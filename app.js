@@ -16,9 +16,9 @@ try {
  
 }
 
-/**app.get('/', (req, res) => {
+app.get('/', (req, res) => {
     res.send('Hello world')
-})**/
+})
 
 app.listen(8000, () => {
     console.log('Server UP runnig in http://localhost:8000/')
