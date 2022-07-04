@@ -1,27 +1,100 @@
-import express from "express";
-import cors from 'cors'
-import db from "./database/db.js";
-import autoRoutes from "./routes/routes.js"
+const cors = require('cors');
 
-const app = express()
+const express = require('express');
+const mysql = require('mysql');
+
+const bodyParser = require('body-parser');
+
+const PORT = process.env.PORT || 8000;
+
+const app = express();
 
 app.use(cors())
-app.use(express.json())
-app.use('/autos', autoRoutes)
-try {
-    await db.authenticate()
-    console.log('Conexion exitosa a BD')
-} catch (error) {
-    console.log(`Error de coenxion: ${error}`)
- 
-}
 
+app.use(bodyParser.json());
+
+// MySql
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '14040002',
+  database: 'database_app'
+});
+
+// Route
 app.get('/', (req, res) => {
-    res.send('Hello world')
-})
+  res.send('Welcome to my API!');
+});
 
-app.listen(8000, () => {
-    console.log('Server UP runnig in http://localhost:8000/')
+// all customers
+app.get('/autos/', (req, res) => {
+  const sql = 'SELECT * FROM autos';
 
+  connection.query(sql, (error, results) => {
+    if (error) throw error;
+    if (results.length > 0) {
+      res.json(results);
+    } else {
+      res.send('Not result');
+    }
+  });
+});
 
-})
+app.get('/autos/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = `SELECT * FROM autos WHERE id = ${id}`;
+  connection.query(sql, (error, result) => {
+    if (error) throw error;
+
+    if (result.length > 0) {
+      res.json(result);
+    } else {
+      res.send('Not result');
+    }
+  });
+});
+
+app.post('/autos/', (req, res) => {
+  const sql = 'INSERT INTO autos SET ?';
+
+  const customerObj = {
+    nombre: req.body.nombre,
+    marca: req.body.marca,
+    modelo: req.body.modelo,
+    precio: req.body.precio
+  };
+
+  connection.query(sql, customerObj, error => {
+    if (error) throw error;
+    res.send('Auto creado!');
+  });
+});
+
+app.put('/autos/:id', (req, res) => {
+  const { id } = req.params;
+  const { nombre, marca, modelo, precio } = req.body;
+  const sql = `UPDATE autos SET nombre = '${nombre}', marca='${marca}', modelo='${modelo}', precio='${precio}'WHERE id =${id}`;
+
+  connection.query(sql, error => {
+    if (error) throw error;
+    res.send('Auto actualizado!');
+  });
+});
+
+app.delete('/autos/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = `DELETE FROM autos WHERE id= ${id}`;
+
+  connection.query(sql, error => {
+    if (error) throw error;
+    res.send('Auto eliminado');
+  });
+});
+
+// Check connect
+connection.connect(error => {
+  if (error) throw error;
+  console.log('Database server running!');
+});
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
