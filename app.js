@@ -15,11 +15,13 @@ app.use(bodyParser.json());
 
 // MySql
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '14040002',
-  database: 'database_app'
+  host: 'us-cdbr-east-06.cleardb.net',
+  user: 'b9bd810202aadc',
+  password: 'd257bbbf',
+  database: 'heroku_ef92cd14c0bcf40'
 });
+
+
 
 // Route
 app.get('/', (req, res) => {
